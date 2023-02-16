@@ -2,6 +2,23 @@
 
 <!-- Step 1: List all transactions, starting with the ICO -->
 
+<% transactions = Transaction.all %>
+<%= transactions.inspect%>
+
+<ol>
+    <% for transaction in transactions %>
+        <!--% from_user_name = User.find_by({"id" => transaction["from_user_id"]})["name"]%-->
+        <%from_user = User.find_by({"id" => transaction["from_user_id"]})%>
+        <% to_user_name = User.find_by({"id" => transaction["to_user_id"]})["name"]%>
+        <% if from_user %>
+            <li><%= "#{transaction["amount"]} from #{from_user["name"]} to #{to_user_name}" %></li>
+        <% else %>
+            <li><%= "Initial offering: #{transaction["amount"]} to #{to_user_name}"%></li>
+        <% end %>
+    <% end %>
+</ol>
+
+
 <!-- Step 2: Calculate and display the balances -->
 
 <!-- 
@@ -12,3 +29,33 @@ Balance for Evan: 1164 KC
 Balance for Anthony: 1456 KC
 Balance for Krystina: 3516 KC 
 -->
+
+<% users = User.all %>
+<%= users.inspect%>
+
+<p>
+    <% for user in users %>
+        <% initial_amount = 0 %>
+        <% add_up_amount = initial_amount + Transaction.where({ "to_user_id" => user["id"] }).sum("amount") %>
+        <% remain_amount = add_up_amount - Transaction.where({ "from_user_id" => user["id"] }).sum("amount") %>
+        <p><%= "Balance for #{user["name"]}: #{remain_amount} KC" %></p>
+    <% end %>
+</p>
+
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Balances</th>
+  </tr>
+  <% for user in users %>
+  <tr>
+    <td><%= user["name"] %></td>
+    <td>
+        <% initial_amount = 0 %>
+        <% add_up_amount = initial_amount + Transaction.where({ "to_user_id" => user["id"] }).sum("amount") %>
+        <% remain_amount = add_up_amount - Transaction.where({ "from_user_id" => user["id"] }).sum("amount") %>
+        <%= "#{remain_amount} KC"%>
+    </td>
+  </tr>
+  <% end %>
+</table>
